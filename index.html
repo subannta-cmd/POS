@@ -182,36 +182,41 @@
         function clearCart() { cart = []; document.getElementById('cash-received').value = ''; renderCart(); }
 
         async function checkout() {
-            if (cart.length === 0) return;
-            const cash = parseFloat(document.getElementById('cash-received').value) || 0;
-            if (cash < grandTotal) return alert('จำนวนเงินไม่เพียงพอ');
+    if (cart.length === 0) return;
+    const cash = parseFloat(document.getElementById('cash-received').value) || 0;
+    if (cash < grandTotal) return alert('จำนวนเงินไม่เพียงพอ');
 
-            const btn = document.getElementById('btn-checkout');
-            btn.innerText = "กำลังบันทึก...";
-            btn.disabled = true;
+    const btn = document.getElementById('btn-checkout');
+    const originalText = btn.innerText;
+    btn.innerText = "กำลังบันทึก...";
+    btn.disabled = true;
 
-            try {
-                // ส่งข้อมูลเข้า Google Sheets แบบแยกบรรทัด
-                await fetch(scriptURL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    cache: 'no-cache',
-                    body: JSON.stringify({
-                        amount: grandTotal,
-                        items: cart, 
-                        timestamp: new Date().toLocaleString('th-TH')
-                    })
-                });
-            } catch (error) { console.error("Error:", error); }
+    // 1. สั่งพิมพ์ทันทีเพื่อให้รายการสินค้ายังอยู่ในหน้าจอ
+    window.print(); 
 
-            // พิมพ์ใบเสร็จ (รายการในตะกร้าจะยังอยู่จนกว่าจะพิมพ์เสร็จ)
-            window.print(); 
+    // 2. ส่งข้อมูลไป Google Sheets (ทำงานเบื้องหลัง)
+    try {
+        await fetch(scriptURL, {
+            method: 'POST',
+            mode: 'no-cors',
+            cache: 'no-cache',
+            body: JSON.stringify({
+                amount: grandTotal,
+                items: cart, 
+                timestamp: new Date().toLocaleString('th-TH')
+            })
+        });
+    } catch (error) { 
+        console.error("Error:", error); 
+    }
 
-            // ล้างค่าและรีเซ็ตหน้าจอ
-            btn.innerText = "บันทึก & พิมพ์";
-            btn.disabled = false;
-            clearCart();
-        }
+    // 3. รอให้พิมพ์เสร็จค่อยล้างตะกร้าสินค้า
+    setTimeout(() => {
+        btn.innerText = originalText;
+        btn.disabled = false;
+        clearCart();
+    }, 1000);
+}
 
         // --- ระบบ Admin ---
         function openAdmin() { 
