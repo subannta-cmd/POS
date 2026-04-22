@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Na COCO POS 🌴</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Kanit', sans-serif; background-color: #f4f7f4; }
+        .menu-card { transition: all 0.2s; border: 2px solid transparent; background: white; cursor: pointer; }
+        .menu-card:active { transform: scale(0.95); }
+        .menu-card:hover { border-color: #10b981; }
+        .category-title { border-left: 4px solid #059669; padding-left: 10px; margin: 24px 0 12px 0; font-weight: bold; color: #374151; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
+        @media print {
+            body * { visibility: hidden; }
+            #receipt-area, #receipt-area * { visibility: visible; }
+            #receipt-area { position: absolute; left: 0; top: 0; width: 100%; border: none; }
+            .print-hidden { display: none !important; }
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div id="admin-modal" class="modal">
+        <div class="bg-white rounded-[40px] w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col shadow-2xl m-4">
+            <div class="p-8 border-b flex justify-between items-center bg-green-50">
+                <h2 class="text-2xl font-bold text-green-800 flex items-center gap-2"><i class="fas fa-cog"></i> ตั้งค่าระบบ</h2>
+                <button onclick="closeAdmin()" class="text-gray-400 text-3xl">&times;</button>
+            </div>
+            <div id="admin-content" class="p-8 overflow-y-auto space-y-6">
+                <div class="bg-white p-6 rounded-[30px] border-2 border-dashed border-green-200">
+                    <h3 class="font-bold text-green-800 mb-4"><i class="fas fa-image mr-2"></i> โลโก้ร้าน</h3>
+                    <div class="flex items-center gap-6">
+                        <img id="admin-logo-preview" src="https://i.ibb.co/LzfNqfX/image-1aad44.png" class="w-20 h-20 object-contain bg-gray-50 rounded-2xl p-2 border">
+                        <div class="flex-grow">
+                            <label class="block bg-green-600 text-white text-center py-3 rounded-2xl font-bold cursor-pointer hover:bg-green-700 transition-all">
+                                <i class="fas fa-upload mr-2"></i> เปลี่ยนรูปโลโก้
+                                <input type="file" id="logo-input" class="hidden" accept="image/*" onchange="previewLogo(this)">
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div id="menu-edit-list" class="space-y-6"></div>
+            </div>
+            <div class="p-8 border-t bg-gray-50 flex gap-4">
+                <button onclick="addNewCategory()" class="bg-blue-500 text-white px-6 py-3 rounded-2xl font-bold shadow-lg">+ เพิ่มหมวดหมู่</button>
+                <button onclick="saveAndReload()" class="flex-grow bg-green-600 text-white py-3 rounded-2xl font-bold shadow-lg">บันทึกทั้งหมด</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex h-screen overflow-hidden">
+        <div class="w-2/3 p-6 overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex items-center gap-4">
+                    <img id="main-logo" src="https://i.ibb.co/LzfNqfX/image-1aad44.png" alt="Logo" class="w-16 h-16 object-contain">
+                    <div>
+                        <h1 class="text-3xl font-black text-green-900 leading-none">COCO BIO <span class="text-green-500">POS</span></h1>
+                        <p class="text-[10px] text-gray-400 mt-1 uppercase font-bold tracking-widest">Na Coco Garden</p>
+                    </div>
+                    <button onclick="openAdmin()" class="ml-2 w-10 h-10 flex items-center justify-center bg-white rounded-full shadow-sm border border-gray-100"><i class="fas fa-cog text-gray-400"></i></button>
+                </div>
+                <button onclick="addCustomItem()" class="bg-orange-500 text-white px-6 py-3 rounded-2xl text-sm font-bold shadow-lg">➕ เมนูพิเศษ</button>
+            </div>
+            <div id="menu-sections"></div>
+        </div>
+
+        <div id="receipt-area" class="w-1/3 bg-white shadow-2xl flex flex-col border-l-2 border-green-50">
+            <div class="p-8 border-b border-dashed border-gray-200 text-center">
+                <img id="receipt-logo" src="https://i.ibb.co/LzfNqfX/image-1aad44.png" class="w-20 h-20 object-contain mx-auto mb-3">
+                <h2 class="text-2xl font-black text-gray-800 uppercase">NA COCO</h2>
+                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Integrated Farming System</p>
+            </div>
+
+            <div id="cart-items" class="flex-grow p-6 overflow-y-auto space-y-3 bg-slate-50/30">
+                <p class="text-center text-gray-300 mt-10 italic">เลือกรายการสินค้า...</p>
+            </div>
+
+            <div class="p-6 bg-white border-t-2 border-green-50 space-y-4">
+                <div class="flex justify-between items-end">
+                    <span class="text-xl font-bold text-gray-400">ยอดรวม</span>
+                    <span class="text-5xl font-black text-green-800"><span id="total-amount">0</span>.-</span>
+                </div>
+                <input type="number" id="cash-received" oninput="calculateChange()" class="w-full text-4xl p-5 bg-gray-50 border-2 border-transparent rounded-[24px] text-right font-black focus:border-green-500 focus:bg-white outline-none shadow-inner" placeholder="รับเงิน">
+                
+                <div class="flex justify-between items-center p-5 bg-orange-50 rounded-[24px] border border-orange-100">
+                    <span class="text-xs font-black text-orange-600 uppercase">เงินทอน</span>
+                    <span class="text-3xl font-black text-orange-600"><span id="change-amount">0</span>.-</span>
+                </div>
+
+                <div class="grid grid-cols-4 gap-3 pt-2 print-hidden">
+                    <button onclick="clearCart()" class="bg-gray-100 text-gray-400 py-5 rounded-2xl font-bold">ล้าง</button>
+                    <button id="btn-checkout" onclick="checkout()" class="col-span-3 bg-green-600 text-white py-5 rounded-[24px] font-bold text-xl shadow-xl hover:bg-green-700 active:scale-95 transition-all">บันทึก & พิมพ์</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbyq0y3pYkdwsZudgURaX4x4N0dJTs9EpiyWJtkX8-Do6Bl5rGbtuD_-sExEPATTV3Mo/exec';
+        const defaultLogo = "https://i.ibb.co/LzfNqfX/image-1aad44.png";
+        
+        let menuCategories = JSON.parse(localStorage.getItem('na_coco_menu')) || [
+            { title: "🥥 มะพร้าวสด", items: [{ name: "น้ำมะพร้าวสด", price: 30, icon: "🥤" }] },
+            { title: "☕ กาแฟ", items: [{ name: "อเมริกาโน่", price: 35, icon: "☕" }] }
+        ];
+        
+        let currentLogo = localStorage.getItem('na_coco_logo') || defaultLogo;
+        let cart = [];
+        let grandTotal = 0;
+
+        function updateLogoDisplay() {
+            document.getElementById('main-logo').src = currentLogo;
+            document.getElementById('receipt-logo').src = currentLogo;
+            document.getElementById('admin-logo-preview').src = currentLogo;
+        }
+
+        function previewLogo(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    currentLogo = e.target.result;
+                    document.getElementById('admin-logo-preview').src = currentLogo;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function renderMenu() {
+            const container = document.getElementById('menu-sections');
+            container.innerHTML = menuCategories.map((cat) => `
+                <h3 class="category-title text-xs uppercase tracking-widest">${cat.title}</h3>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-5 mb-8">
+                    ${cat.items.map(item => `
+                        <button onclick="addToCart('${item.name}', ${item.price})" class="menu-card p-6 rounded-[35px] shadow-sm flex flex-col items-center text-center">
+                            <span class="text-4xl mb-2">${item.icon}</span>
+                            <div class="font-bold text-gray-700 text-[13px] uppercase">${item.name}</div>
+                            <div class="text-green-600 font-black text-lg">${item.price}.-</div>
+                        </button>
+                    `).join('')}
+                </div>
+            `).join('');
+        }
+
+        function addToCart(name, price) {
+            cart.push({ name, price });
+            renderCart();
+        }
+
+        function renderCart() {
+            const cartDiv = document.getElementById('cart-items');
+            if (cart.length === 0) {
+                cartDiv.innerHTML = '<p class="text-center text-gray-300 mt-10 italic">เลือกรายการสินค้า...</p>';
+                document.getElementById('total-amount').innerText = '0';
+                grandTotal = 0;
+                calculateChange();
+                return;
+            }
+            grandTotal = cart.reduce((s, i) => s + i.price, 0);
+            cartDiv.innerHTML = cart.map((item, index) => `
+                <div class="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                    <div class="text-[13px] font-bold text-gray-700 uppercase">${item.name}</div>
+                    <div class="flex items-center gap-3">
+                        <span class="font-black text-green-600">${item.price}.-</span>
+                        <button onclick="removeItem(${index})" class="text-red-200 print-hidden"><i class="fas fa-times-circle text-xl"></i></button>
+                    </div>
+                </div>`).join('');
+            document.getElementById('total-amount').innerText = grandTotal.toLocaleString();
+            calculateChange();
+        }
+
+        function calculateChange() {
+            const cash = parseFloat(document.getElementById('cash-received').value) || 0;
+            const change = cash - grandTotal;
+            document.getElementById('change-amount').innerText = (cash >= grandTotal && grandTotal > 0) ? change.toLocaleString() : '0';
+        }
+
+        function removeItem(index) { cart.splice(index, 1); renderCart(); }
+        function clearCart() { cart = []; document.getElementById('cash-received').value = ''; renderCart(); }
+
+        async function checkout() {
+            if (cart.length === 0) return;
+            const cash = parseFloat(document.getElementById('cash-received').value) || 0;
+            if (cash < grandTotal) return alert('จำนวนเงินไม่เพียงพอ');
+
+            const btn = document.getElementById('btn-checkout');
+            btn.innerText = "กำลังบันทึก...";
+            btn.disabled = true;
+
+            try {
+                // ส่งข้อมูลเข้า Google Sheets แบบแยกบรรทัด
+                await fetch(scriptURL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    cache: 'no-cache',
+                    body: JSON.stringify({
+                        amount: grandTotal,
+                        items: cart, 
+                        timestamp: new Date().toLocaleString('th-TH')
+                    })
+                });
+            } catch (error) { console.error("Error:", error); }
+
+            // พิมพ์ใบเสร็จ (รายการในตะกร้าจะยังอยู่จนกว่าจะพิมพ์เสร็จ)
+            window.print(); 
+
+            // ล้างค่าและรีเซ็ตหน้าจอ
+            btn.innerText = "บันทึก & พิมพ์";
+            btn.disabled = false;
+            clearCart();
+        }
+
+        // --- ระบบ Admin ---
+        function openAdmin() { 
+            document.getElementById('admin-modal').style.display = 'flex'; 
+            renderAdminContent(); 
+        }
+        function closeAdmin() { document.getElementById('admin-modal').style.display = 'none'; }
+        
+        function renderAdminContent() {
+            const content = document.getElementById('menu-edit-list');
+            content.innerHTML = menuCategories.map((cat, cIdx) => `
+                <div class="bg-gray-50 p-6 rounded-[30px] border border-gray-100 shadow-sm">
+                    <div class="flex gap-2 mb-4">
+                        <input type="text" value="${cat.title}" onchange="menuCategories[${cIdx}].title = this.value" class="flex-grow font-black text-green-800 bg-transparent border-b border-gray-300 focus:outline-none p-1">
+                        <button onclick="menuCategories.splice(${cIdx}, 1); renderAdminContent();" class="text-red-400 p-2"><i class="fas fa-trash"></i></button>
+                    </div>
+                    <div class="space-y-2">
+                        ${cat.items.map((item, iIdx) => `
+                            <div class="flex gap-2 bg-white p-3 rounded-2xl shadow-sm items-center">
+                                <input type="text" value="${item.icon}" onchange="menuCategories[${cIdx}].items[${iIdx}].icon = this.value" class="w-10 text-center text-xl">
+                                <input type="text" value="${item.name}" onchange="menuCategories[${cIdx}].items[${iIdx}].name = this.value" class="flex-grow text-sm font-bold">
+                                <input type="number" value="${item.price}" onchange="menuCategories[${cIdx}].items[${iIdx}].price = parseFloat(this.value)" class="w-16 text-right font-black text-green-600">
+                                <button onclick="menuCategories[${cIdx}].items.splice(${iIdx}, 1); renderAdminContent();" class="text-red-200 text-xl">&times;</button>
+                            </div>
+                        `).join('')}
+                        <button onclick="menuCategories[${cIdx}].items.push({name:'ใหม่',price:0,icon:'🥥'}); renderAdminContent();" class="w-full py-2 border-2 border-dashed border-gray-200 rounded-2xl text-gray-400 text-xs font-bold">+ เพิ่มรายการ</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addNewCategory() { menuCategories.push({ title: "หมวดหมู่ใหม่", items: [] }); renderAdminContent(); }
+        
+        function saveAndReload() { 
+            localStorage.setItem('na_coco_menu', JSON.stringify(menuCategories)); 
+            localStorage.setItem('na_coco_logo', currentLogo); 
+            updateLogoDisplay();
+            renderMenu(); 
+            closeAdmin(); 
+        }
+
+        function addCustomItem() { 
+            const n = prompt("ชื่อเมนู:"); 
+            const p = prompt("ราคา:"); 
+            if(n && p) addToCart(n, parseFloat(p)); 
+        }
+
+        // โหลดข้อมูลเริ่มต้น
+        updateLogoDisplay();
+        renderMenu();
+    </script>
+</body>
+</html>
