@@ -16,6 +16,7 @@
         .category-header { grid-column: 1 / -1; margin-top: 1.5rem; border-left: 4px solid #166534; padding-left: 0.75rem; margin-bottom: 0.5rem; }
         .sweet-btn { border: 2px solid #e5e7eb; padding: 10px; border-radius: 15px; font-size: 14px; cursor: pointer; text-align: center; font-weight: bold; }
         .sweet-btn.active { border-color: #f97316; background-color: #fff7ed; color: #f97316; }
+        
         @media print { 
             .print-hidden { display: none !important; } 
             #receipt-area { width: 100% !important; position: absolute; top: 0; left: 0; border: none !important; box-shadow: none !important; } 
@@ -23,10 +24,11 @@
             .flex { display: block; }
             #receipt-logo { display: block !important; margin: 0 auto 10px auto !important; width: 60px !important; }
         }
+
         .discount-unit-btn { padding: 2px 8px; font-size: 10px; font-weight: bold; border-radius: 8px; border: 1px solid #e5e7eb; background: white; color: #9ca3af; }
         .discount-unit-btn.active { background: #ef4444; color: white; border-color: #ef4444; }
         
-        /* เพิ่มสไตล์สำหรับปุ่มยืนยันที่ส่องแสงเตือน */
+        /* สไตล์สำหรับปุ่มยืนยันที่ส่องแสง */
         .btn-confirm-order { animation: pulse-green 2s infinite; }
         @keyframes pulse-green {
             0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
@@ -122,8 +124,7 @@
                 <p id="cur-date" class="text-[9px] text-gray-400 italic">--/--/-- --:--</p>
             </div>
             
-            <div id="cart-list" class="flex-grow p-4 overflow-y-auto space-y-2 bg-gray-50/30">
-                </div>
+            <div id="cart-list" class="flex-grow p-4 overflow-y-auto space-y-2 bg-gray-50/30"></div>
 
             <div id="confirm-section" class="px-4 py-3 bg-green-50 border-t border-green-100 print-hidden hidden">
                 <button onclick="confirmOrder()" class="w-full bg-green-500 text-white py-3 rounded-xl font-bold shadow-md btn-confirm-order flex items-center justify-center gap-2">
@@ -183,7 +184,7 @@
         let tempLogoData = "";
         let editingIndex = null;
         let selectedSweet = '100%';
-        let isOrderConfirmed = false; // สถานะการยืนยันออเดอร์
+        let isOrderConfirmed = false; // สถาณะยืนยันออเดอร์
 
         function init() { 
             const savedLogo = localStorage.getItem('na_coco_logo');
@@ -197,7 +198,6 @@
             updateCart(); 
         }
 
-        // ฟังก์ชันบีบอัดและประมวลผลรูปภาพ
         function processImage(input, type, idx = null) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
@@ -209,8 +209,7 @@
                         let width = img.width;
                         let height = img.height;
                         if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-                        canvas.width = width;
-                        canvas.height = height;
+                        canvas.width = width; canvas.height = height;
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
                         const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
@@ -259,15 +258,14 @@
                 localStorage.setItem('na_coco_addr', document.getElementById('shop-address-input').value);
                 localStorage.setItem('na_coco_pp', document.getElementById('pp-input').value); 
                 localStorage.setItem('na_coco_vat', document.getElementById('vat-rate-input').value);
-                if(tempLogoData) { localStorage.setItem('na_coco_logo', tempLogoData); document.getElementById('main-logo').src = tempLogoData; document.getElementById('receipt-logo').src = tempLogoData; }
+                if(tempLogoData) { localStorage.setItem('na_coco_logo', tempLogoData); }
                 localStorage.setItem('na_coco_menu', JSON.stringify(menuItems)); 
-                document.getElementById('shop-address-display').innerText = document.getElementById('shop-address-input').value;
-                renderApp(); updateCart(); closeAdmin(); alert("✅ บันทึกข้อมูลเรียบร้อยแล้ว");
-            } catch(e) { alert("บันทึกไม่สำเร็จ: หน่วยความจำบราวเซอร์อาจเต็ม แนะนำให้ลดจำนวนรูปภาพลงครับ"); }
+                location.reload();
+            } catch(e) { alert("บันทึกไม่สำเร็จ: หน่วยความจำเต็ม"); }
         }
 
         function addToCart(name, price) { 
-            isOrderConfirmed = false; // เมื่อมีการเพิ่มของใหม่ ต้องกดยืนยันใหม่
+            isOrderConfirmed = false; // เพิ่มของใหม่ ต้องยืนยันใหม่
             cart.push({name, price, qty: 1, sweet: '100%', note: ''}); 
             updateCart(); 
         }
@@ -279,12 +277,11 @@
             updateCart(); 
         }
 
-        // ฟังก์ชันใหม่: กดยืนยันออเดอร์
+        // ฟังก์ชันยืนยันออเดอร์
         function confirmOrder() {
             if(cart.length === 0) return;
             isOrderConfirmed = true;
             updateCart();
-            alert("ยืนยันออเดอร์แล้ว กรุณาชำระเงินและพิมพ์ใบเสร็จ");
         }
 
         function updateCart() {
@@ -298,7 +295,7 @@
                 return `<div class="bg-white p-3 rounded-xl border shadow-sm"><div class="flex justify-between items-start mb-2"><div onclick="openModifier(${idx})" class="cursor-pointer"><span class="text-xs font-bold block">${item.name}</span><span class="text-[9px] text-orange-500 font-bold uppercase">หวาน ${item.sweet} ${item.note ? '| ' + item.note : ''}</span></div><span class="text-xs font-black">${(item.price * item.qty).toLocaleString()}.-</span></div><div class="flex justify-between items-center"><div class="flex items-center gap-3 bg-gray-50 rounded-lg px-2 py-1"><button onclick="changeQty(${idx}, -1)" class="text-orange-500 font-black">-</button><span class="text-xs font-bold w-4 text-center">${item.qty}</span><button onclick="changeQty(${idx}, 1)" class="text-orange-500 font-black">+</button></div><button onclick="cart.splice(${idx},1); isOrderConfirmed=false; updateCart();" class="text-red-200 text-xs"><i class="fas fa-trash"></i></button></div></div>`;
             }).join('');
 
-            // แสดงส่วนยืนยันออเดอร์เมื่อมีสินค้า และยังไม่ได้กดยืนยัน
+            // เงื่อนไขแสดงปุ่มยืนยัน หรือ ปุ่มชำระเงิน
             if (cart.length > 0 && !isOrderConfirmed) {
                 confirmSection.classList.remove('hidden');
                 btnPay.disabled = true;
@@ -382,7 +379,6 @@
             if(cart.length === 0 || !isOrderConfirmed) return;
             const timeStr = new Date().toLocaleString('th-TH');
             document.getElementById('cur-date').innerText = timeStr;
-            
             window.print();
             
             const summaryMap = {};
@@ -390,10 +386,7 @@
                 if (summaryMap[item.name]) summaryMap[item.name] += item.qty;
                 else summaryMap[item.name] = item.qty;
             });
-
-            const cleanItemsForSheet = Object.entries(summaryMap)
-                .map(([name, qty]) => `${name}(${qty})`)
-                .join(', ');
+            const cleanItemsForSheet = Object.entries(summaryMap).map(([name, qty]) => `${name}(${qty})`).join(', ');
 
             try {
                 fetch(scriptURL, { 
@@ -410,13 +403,12 @@
 
             q++; 
             localStorage.setItem('na_coco_q', q);
-            isOrderConfirmed = false;
             clearCart(); 
             renderApp();
         }
 
         function addNewMenuItem() { menuItems.push({ name: 'เมนูใหม่', price: 0, img: '', category: 'ทั่วไป' }); renderAdminMenu(); }
-        function openAdmin() { document.getElementById('admin-modal').style.display = 'flex'; document.getElementById('pp-input').value = localStorage.getItem('na_coco_pp') || ''; document.getElementById('vat-rate-input').value = localStorage.getItem('na_coco_vat') || '0'; document.getElementById('shop-address-input').value = localStorage.getItem('na_coco_addr') || ''; renderAdminMenu(); }
+        function openAdmin() { document.getElementById('admin-modal').style.display = 'flex'; renderAdminMenu(); }
         function closeAdmin() { document.getElementById('admin-modal').style.display = 'none'; }
         function clearCart() { cart = []; isOrderConfirmed = false; document.getElementById('cash-in').value = ''; document.getElementById('discount-val').value = ''; updateCart(); }
         function setUnit(u) { discountUnit = u; document.getElementById('unit-baht').classList.toggle('active', u === '฿'); document.getElementById('unit-percent').classList.toggle('active', u === '%'); updateCart(); }
