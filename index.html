@@ -28,6 +28,7 @@
         .discount-unit-btn { padding: 2px 8px; font-size: 10px; font-weight: bold; border-radius: 8px; border: 1px solid #e5e7eb; background: white; color: #9ca3af; }
         .discount-unit-btn.active { background: #ef4444; color: white; border-color: #ef4444; }
         
+        /* ปุ่มยืนยันออเดอร์กะพริบ */
         .btn-confirm-order { animation: pulse-green 2s infinite; }
         @keyframes pulse-green {
             0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
@@ -188,7 +189,7 @@
         let tempLogoData = "";
         let editingIndex = null;
         let selectedSweet = '100%';
-        let isOrderConfirmed = false;
+        let isOrderConfirmed = false; // ตัวแปรสถานะการยืนยันออเดอร์
 
         function init() { 
             const savedLogo = localStorage.getItem('na_coco_logo');
@@ -205,6 +206,7 @@
             updateCart(); 
         }
 
+        // --- Logic ประมวลผลรูปภาพ (เหมือนเดิม) ---
         function processImage(input, type, idx = null) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
@@ -234,6 +236,7 @@
             }
         }
 
+        // --- Logic แสดงผลสินค้า (เหมือนเดิม) ---
         function renderApp() {
             document.getElementById('next-q').innerText = '#' + q.toString().padStart(2, '0');
             document.getElementById('receipt-q').innerText = '#' + q.toString().padStart(2, '0');
@@ -271,14 +274,15 @@
             } catch(e) { alert("บันทึกไม่สำเร็จ: หน่วยความจำเต็ม"); }
         }
 
+        // --- Core Cart Logic ---
         function addToCart(name, price) { 
-            isOrderConfirmed = false;
+            isOrderConfirmed = false; // Reset สถานะการยืนยันเมื่อมีการเพิ่มสินค้าใหม่
             cart.push({name, price, qty: 1, sweet: '100%', note: ''}); 
             updateCart(); 
         }
 
         function changeQty(idx, delta) { 
-            isOrderConfirmed = false;
+            isOrderConfirmed = false; // Reset สถานะเมื่อมีการเปลี่ยนจำนวน
             cart[idx].qty += delta; 
             if (cart[idx].qty <= 0) cart.splice(idx, 1); 
             updateCart(); 
@@ -301,6 +305,7 @@
                 return `<div class="bg-white p-3 rounded-xl border shadow-sm"><div class="flex justify-between items-start mb-2"><div onclick="openModifier(${idx})" class="cursor-pointer"><span class="text-xs font-bold block">${item.name}</span><span class="text-[9px] text-orange-500 font-bold uppercase">หวาน ${item.sweet} ${item.note ? '| ' + item.note : ''}</span></div><span class="text-xs font-black">${(item.price * item.qty).toLocaleString()}.-</span></div><div class="flex justify-between items-center"><div class="flex items-center gap-3 bg-gray-50 rounded-lg px-2 py-1"><button onclick="changeQty(${idx}, -1)" class="text-orange-500 font-black">-</button><span class="text-xs font-bold w-4 text-center">${item.qty}</span><button onclick="changeQty(${idx}, 1)" class="text-orange-500 font-black">+</button></div><button onclick="cart.splice(${idx},1); isOrderConfirmed=false; updateCart();" class="text-red-200 text-xs"><i class="fas fa-trash"></i></button></div></div>`;
             }).join('');
 
+            // Logic ควบคุมปุ่มชำระเงินและปุ่มยืนยัน
             if (cart.length > 0 && !isOrderConfirmed) {
                 confirmSection.classList.remove('hidden');
                 btnPay.disabled = true;
@@ -335,6 +340,7 @@
             calculateChange();
         }
 
+        // --- Modifiers & Checkout Logic ---
         function openModifier(idx) {
             editingIndex = idx;
             const item = cart[idx];
@@ -353,7 +359,7 @@
             if (editingIndex !== null) { 
                 cart[editingIndex].sweet = selectedSweet; 
                 cart[editingIndex].note = document.getElementById('mod-note').value; 
-                isOrderConfirmed = false;
+                isOrderConfirmed = false; // แก้ไขสินค้าแล้ว ต้องกดยืนยันใหม่
                 updateCart(); 
             }
             document.getElementById('modifier-modal').style.display = 'none';
