@@ -28,7 +28,6 @@
         .discount-unit-btn { padding: 2px 8px; font-size: 10px; font-weight: bold; border-radius: 8px; border: 1px solid #e5e7eb; background: white; color: #9ca3af; }
         .discount-unit-btn.active { background: #ef4444; color: white; border-color: #ef4444; }
         
-        /* สไตล์สำหรับปุ่มยืนยันที่ส่องแสง */
         .btn-confirm-order { animation: pulse-green 2s infinite; }
         @keyframes pulse-green {
             0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
@@ -69,26 +68,26 @@
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div class="col-span-2">
-                        <label class="text-[10px] font-bold text-gray-400 uppercase">ชื่อและที่อยู่ร้าน (แสดงในใบเสร็จ)</label>
-                        <textarea id="shop-address-input" class="w-full p-3 bg-gray-50 rounded-xl border text-xs h-16" placeholder="ระบุชื่อร้านและที่อยู่..."></textarea>
+                        <label class="text-[10px] font-bold text-gray-400 uppercase">ชื่อและที่อยู่ร้าน</label>
+                        <textarea id="shop-address-input" class="w-full p-3 bg-gray-50 rounded-xl border text-xs h-16" placeholder="ระบุชื่อร้าน..."></textarea>
                     </div>
                     <div>
-                        <label class="text-[10px] font-bold text-gray-400 uppercase">เบอร์ PromptPay</label>
-                        <input type="text" id="pp-input" class="w-full p-3 bg-gray-50 rounded-xl border font-bold text-green-700" placeholder="099xxxxxxx">
+                        <label class="text-[10px] font-bold text-gray-400 uppercase">PromptPay</label>
+                        <input type="text" id="pp-input" class="w-full p-3 bg-gray-50 rounded-xl border font-bold text-green-700">
                     </div>
                     <div>
                         <label class="text-[10px] font-bold text-gray-400 uppercase">VAT (%)</label>
-                        <input type="number" id="vat-rate-input" class="w-full p-3 bg-gray-50 rounded-xl border font-bold text-blue-700" placeholder="0">
+                        <input type="number" id="vat-rate-input" class="w-full p-3 bg-gray-50 rounded-xl border font-bold text-blue-700">
                     </div>
                 </div>
                 <div class="border-t pt-4">
-                    <label class="text-[10px] font-bold text-gray-400 uppercase mb-2 block">จัดการรายการเมนู</label>
+                    <label class="text-[10px] font-bold text-gray-400 uppercase mb-2 block">รายการเมนู</label>
                     <div id="admin-menu-list" class="space-y-3"></div>
                 </div>
-                <button onclick="addNewMenuItem()" class="w-full py-2 border-2 border-dashed border-blue-300 rounded-xl text-blue-500 font-bold text-xs mt-2">+ เพิ่มรายการใหม่</button>
+                <button onclick="addNewMenuItem()" class="w-full py-2 border-2 border-dashed border-blue-300 rounded-xl text-blue-500 font-bold text-xs mt-2">+ เพิ่มเมนู</button>
             </div>
             <div class="pt-4 mt-2 border-t">
-                <button onclick="saveSettings()" class="w-full bg-green-600 text-white py-4 rounded-2xl font-bold shadow-lg">บันทึกทั้งหมด</button>
+                <button onclick="saveSettings()" class="w-full bg-green-600 text-white py-4 rounded-2xl font-bold">บันทึกทั้งหมด</button>
             </div>
         </div>
     </div>
@@ -104,8 +103,8 @@
                     </div>
                 </div>
                 <div class="flex gap-2">
-                    <button onclick="resetQueue()" class="p-3 bg-white border rounded-full text-orange-400 shadow-sm hover:bg-orange-50"><i class="fas fa-sync-alt"></i></button>
-                    <button onclick="openAdmin()" class="p-3 bg-white border rounded-full text-gray-400 shadow-sm hover:bg-gray-50"><i class="fas fa-cog"></i></button>
+                    <button onclick="resetQueue()" class="p-3 bg-white border rounded-full text-orange-400 shadow-sm"><i class="fas fa-sync-alt"></i></button>
+                    <button onclick="openAdmin()" class="p-3 bg-white border rounded-full text-gray-400 shadow-sm"><i class="fas fa-cog"></i></button>
                     <div class="bg-orange-100 px-4 py-1 rounded-2xl border border-orange-200 text-center">
                         <span class="text-[9px] block font-bold text-orange-500 leading-none">คิวที่</span>
                         <span id="next-q" class="text-xl font-black text-orange-600">#01</span>
@@ -128,7 +127,7 @@
 
             <div id="confirm-section" class="px-4 py-3 bg-green-50 border-t border-green-100 print-hidden hidden">
                 <button onclick="confirmOrder()" class="w-full bg-green-500 text-white py-3 rounded-xl font-bold shadow-md btn-confirm-order flex items-center justify-center gap-2">
-                    <i class="fas fa-check-circle"></i> ยืนยันสั่งออเดอร์
+                    <i class="fas fa-check-circle"></i> ยืนยันออเดอร์
                 </button>
             </div>
 
@@ -142,7 +141,8 @@
                     <img id="qr-img" src="" class="w-24 h-24 mx-auto rounded-lg">
                 </div>
                 <div class="space-y-1 text-xs">
-                    <div class="flex justify-between text-gray-400 font-bold text-[10px]"><span>ยอดรวม (SUBTOTAL)</span><span><span id="sub-total">0</span>.-</span></div>
+                    <div class="flex justify-between text-gray-400 font-bold text-[10px]"><span>SUBTOTAL</span><span><span id="sub-total">0</span>.-</span></div>
+                    
                     <div class="flex justify-between items-center px-2 py-1 bg-red-50 rounded-xl print-hidden">
                         <span class="text-red-500 font-bold text-[10px]">ส่วนลด</span>
                         <div class="flex items-center gap-1">
@@ -151,6 +151,7 @@
                             <button id="unit-percent" onclick="setUnit('%')" class="discount-unit-btn">%</button>
                         </div>
                     </div>
+
                     <div id="row-discount" class="hidden justify-between text-red-500 font-bold text-[10px]">
                         <span>ส่วนลด (<span id="txt-dis-label">0</span>)</span><span>-<span id="txt-dis-amount">0</span>.-</span>
                     </div>
@@ -158,17 +159,20 @@
                         <span>ภาษี (<span id="txt-vat-rate">0</span>%)</span><span>+<span id="txt-vat-amount">0</span>.-</span>
                     </div>
                     <div class="flex justify-between items-end pt-1">
-                        <span class="text-gray-400 font-bold text-[10px]">ยอดสุทธิ (TOTAL)</span><span class="text-4xl font-black text-green-700"><span id="total-price">0</span>.-</span>
+                        <span class="text-gray-400 font-bold text-[10px]">TOTAL</span><span class="text-4xl font-black text-green-700"><span id="total-price">0</span>.-</span>
                     </div>
                 </div>
+
                 <div class="print-hidden pt-2">
                     <input type="number" id="cash-in" oninput="calculateChange()" class="w-full p-4 bg-gray-50 border rounded-2xl text-right font-black text-2xl outline-none" placeholder="รับเงิน...">
                 </div>
+                
                 <div id="change-box" class="hidden flex justify-between items-center px-3 py-2 bg-orange-50 rounded-xl border border-orange-100">
                     <span class="text-orange-500 font-bold text-xs">เงินทอน</span><span class="text-xl font-black text-orange-600"><span id="change-amount">0</span>.-</span>
                 </div>
+
                 <div class="flex gap-2 print-hidden">
-                    <button onclick="clearCart()" class="p-4 bg-gray-100 text-gray-400 rounded-2xl hover:bg-red-50 hover:text-red-400"><i class="fas fa-trash"></i></button>
+                    <button onclick="clearCart()" class="p-4 bg-gray-100 text-gray-400 rounded-2xl"><i class="fas fa-trash"></i></button>
                     <button id="btn-pay" onclick="handleCheckout()" class="flex-grow bg-gray-300 text-white py-4 rounded-2xl font-black text-lg cursor-not-allowed" disabled>ชำระเงิน & พิมพ์</button>
                 </div>
             </div>
@@ -184,7 +188,7 @@
         let tempLogoData = "";
         let editingIndex = null;
         let selectedSweet = '100%';
-        let isOrderConfirmed = false; // สถาณะยืนยันออเดอร์
+        let isOrderConfirmed = false;
 
         function init() { 
             const savedLogo = localStorage.getItem('na_coco_logo');
@@ -194,6 +198,9 @@
                 document.getElementById('admin-logo-preview').src = savedLogo;
             }
             document.getElementById('shop-address-display').innerText = localStorage.getItem('na_coco_addr') || "";
+            document.getElementById('shop-address-input').value = localStorage.getItem('na_coco_addr') || "";
+            document.getElementById('pp-input').value = localStorage.getItem('na_coco_pp') || "";
+            document.getElementById('vat-rate-input').value = localStorage.getItem('na_coco_vat') || "0";
             renderApp(); 
             updateCart(); 
         }
@@ -265,7 +272,7 @@
         }
 
         function addToCart(name, price) { 
-            isOrderConfirmed = false; // เพิ่มของใหม่ ต้องยืนยันใหม่
+            isOrderConfirmed = false;
             cart.push({name, price, qty: 1, sweet: '100%', note: ''}); 
             updateCart(); 
         }
@@ -277,7 +284,6 @@
             updateCart(); 
         }
 
-        // ฟังก์ชันยืนยันออเดอร์
         function confirmOrder() {
             if(cart.length === 0) return;
             isOrderConfirmed = true;
@@ -295,7 +301,6 @@
                 return `<div class="bg-white p-3 rounded-xl border shadow-sm"><div class="flex justify-between items-start mb-2"><div onclick="openModifier(${idx})" class="cursor-pointer"><span class="text-xs font-bold block">${item.name}</span><span class="text-[9px] text-orange-500 font-bold uppercase">หวาน ${item.sweet} ${item.note ? '| ' + item.note : ''}</span></div><span class="text-xs font-black">${(item.price * item.qty).toLocaleString()}.-</span></div><div class="flex justify-between items-center"><div class="flex items-center gap-3 bg-gray-50 rounded-lg px-2 py-1"><button onclick="changeQty(${idx}, -1)" class="text-orange-500 font-black">-</button><span class="text-xs font-bold w-4 text-center">${item.qty}</span><button onclick="changeQty(${idx}, 1)" class="text-orange-500 font-black">+</button></div><button onclick="cart.splice(${idx},1); isOrderConfirmed=false; updateCart();" class="text-red-200 text-xs"><i class="fas fa-trash"></i></button></div></div>`;
             }).join('');
 
-            // เงื่อนไขแสดงปุ่มยืนยัน หรือ ปุ่มชำระเงิน
             if (cart.length > 0 && !isOrderConfirmed) {
                 confirmSection.classList.remove('hidden');
                 btnPay.disabled = true;
