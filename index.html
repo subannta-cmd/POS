@@ -17,45 +17,40 @@
         .sweet-btn { border: 2px solid #e5e7eb; padding: 10px; border-radius: 15px; font-size: 14px; cursor: pointer; text-align: center; font-weight: bold; }
         .sweet-btn.active { border-color: #f97316; background-color: #fff7ed; color: #f97316; }
         
-        @media print {
+       @media print {
     @page { 
         size: 58mm auto; 
         margin: 0; 
     }
-    body { 
-        background: white !important; 
-        color: black !important; 
-        margin: 0; 
-        padding: 0; 
-        -webkit-print-color-adjust: economy; 
-        filter: grayscale(100%); 
+
+    /* 1. ซ่อนทุกอย่างในหน้าเว็บออกไปก่อน */
+    body * {
+        visibility: hidden;
     }
-    
-    * {
+
+    /* 2. เลือกแสดงเฉพาะพื้นที่ใบเสร็จเท่านั้น */
+    #receipt-area, #receipt-area * {
+        visibility: visible;
+    }
+
+    /* 3. จัดตำแหน่งใบเสร็จให้ไปอยู่ที่มุมซ้ายบนของกระดาษ */
+    #receipt-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100% !important;
+        max-width: 48mm !important;
+        margin: 0 !important;
+        padding: 1mm 1mm 40mm 1mm !important; /* เว้นท้าย 40mm กันโดนตัด */
+        display: block !important;
+        border: none !important;
+    }
+
+    /* ส่วนเสริมเพื่อความคมชัด (ขาวดำ) */
+    body {
+        background: white !important;
         color: black !important;
-        background-color: transparent !important;
-        box-shadow: none !important;
-        text-shadow: none !important;
-    }
-
-    .print-hidden, .modal, .flex.h-screen > .w-2/3 { 
-        display: none !important; 
-    }
-    
-    .flex.h-screen { 
-        height: auto !important; 
-        display: block !important; 
-    }
-
-    #receipt-area { 
-        width: 100% !important; 
-        max-width: 48mm !important; 
-        margin: 0 auto !important; 
-        border: none !important; 
-        position: static !important; 
-        padding: 1mm !important;
-        /* เพิ่มระยะขอบล่างเพื่อให้พ้นระยะตัดของเครื่องพิมพ์ */
-        padding-bottom: 30mm !important; 
+        filter: grayscale(100%);
     }
 
     #receipt-area img { 
@@ -85,18 +80,6 @@
         font-weight: bold !important;
     }
 
-    /* ซ่อนปุ่มและส่วนควบคุมอื่นๆ */
-    #confirm-section, 
-    .discount-unit-btn, 
-    #cash-in, 
-    #btn-pay, 
-    .px-4.py-2.border-t, 
-    #qr-area,
-    #change-box { 
-        display: none !important; 
-    }
-
-    /* ตกแต่งส่วนท้ายใบเสร็จให้ดูเป็นทางการขึ้นและช่วยเพิ่มพื้นที่ */
     #receipt-area::after {
         content: "--- ขอบคุณที่ใช้บริการ ---";
         display: block;
@@ -107,10 +90,9 @@
         border-top: 1px solid black;
     }
 
-    #receipt-note { 
-        border: none !important; 
-        padding: 0 !important; 
-        font-size: 10px !important;
+    /* ซ่อนส่วนประกอบอื่นๆ ที่อาจหลุดมา */
+    .print-hidden, .modal, #admin-panel, #confirm-section, #qr-area {
+        display: none !important;
     }
 }
 
