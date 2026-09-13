@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ณ COCO POS 🌴</title>
+    <title>POS System 🌴</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
@@ -17,6 +17,14 @@
         .sweet-btn { border: 2px solid #e5e7eb; padding: 10px; border-radius: 15px; font-size: 14px; cursor: pointer; text-align: center; font-weight: bold; }
         .sweet-btn.active { border-color: #f97316; background-color: #fff7ed; color: #f97316; }
         
+        .discount-unit-btn { padding: 2px 8px; font-size: 10px; font-weight: bold; border-radius: 8px; border: 1px solid #e5e7eb; background: white; color: #9ca3af; }
+        .discount-unit-btn.active { background: #ef4444; color: white; border-color: #ef4444; }
+        .btn-confirm-order { animation: pulse-green 2s infinite; }
+        @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
+
+        /* Style ปรินต์ */
+        #daily-receipt-area { display: none; }
+
         @media print {
             @page { 
                 size: 58mm auto; 
@@ -31,21 +39,20 @@
                 print-color-adjust: exact !important;
                 box-shadow: none !important;
                 text-shadow: none !important;
-                visibility: hidden;
-            }
-
-            #receipt-area, #receipt-area * {
-                visibility: visible;
             }
 
             body { 
                 background: white !important; 
                 margin: 0; 
                 padding: 0;
-                filter: grayscale(100%) !important;
             }
 
-            #receipt-area { 
+            .print-hidden, .modal, #admin-panel, #confirm-section, .flex.h-screen {
+                display: none !important;
+            }
+
+            /* สลิปออเดอร์ */
+            body.print-order #receipt-area { 
                 display: block !important;
                 position: absolute;
                 top: 0;
@@ -57,70 +64,38 @@
                 border: none !important;
             }
 
-            #receipt-area img { 
-                width: 30mm !important; 
+            /* สลิปปิดยอด */
+            body.print-daily #daily-receipt-area { 
+                display: block !important;
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100% !important; 
+                max-width: 44mm !important;
+                margin: 0 !important; 
+                padding: 2mm 2mm 10mm 2mm !important;
+                border: none !important;
+                font-size: 11px;
+            }
+
+            #receipt-area img, #daily-receipt-area img { 
+                width: 25mm !important; 
                 height: auto !important;
-                filter: grayscale(100%) contrast(2) !important; 
                 margin-bottom: 2mm;
                 display: block;
                 margin-left: auto;
                 margin-right: auto;
             }
 
-            #qr-area {
-                display: block !important;
-                border: none !important;
-                padding: 2mm 0 !important;
-                margin-top: 2mm !important;
-            }
-
-            #qr-area img {
-                width: 28mm !important;
-                height: 28mm !important;
-            }
-
             #receipt-area #receipt-q { 
-                font-size: 36px !important; 
+                font-size: 32px !important; 
                 font-weight: 900 !important;
-                border: 3px solid black !important;
+                border: 2px solid black !important;
                 display: inline-block;
-                padding: 2mm 5mm;
+                padding: 1mm 4mm;
                 margin: 2mm 0;
-                color: black !important;
-            }
-
-            #cart-list > div { 
-                border-bottom: 1.5px dashed black !important; 
-                padding-bottom: 4px !important; 
-                margin-bottom: 4px !important; 
-            }
-
-            #total-price {
-                font-size: 24px !important;
-                font-weight: bold !important;
-                color: black !important;
-            }
-
-            #receipt-area::after {
-                content: "--- ขอบคุณที่ใช้บริการ ---";
-                display: block;
-                text-align: center;
-                font-size: 10px;
-                margin-top: 5mm;
-                padding-bottom: 5mm;
-                border-top: 1px solid black;
-                color: black !important;
-            }
-
-            .print-hidden, .modal, #admin-panel, #confirm-section, .flex.h-screen {
-                display: none !important;
             }
         }
-
-        .discount-unit-btn { padding: 2px 8px; font-size: 10px; font-weight: bold; border-radius: 8px; border: 1px solid #e5e7eb; background: white; color: #9ca3af; }
-        .discount-unit-btn.active { background: #ef4444; color: white; border-color: #ef4444; }
-        .btn-confirm-order { animation: pulse-green 2s infinite; }
-        @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
     </style>
 </head>
 <body class="text-gray-800">
@@ -191,7 +166,7 @@
                     <button type="button" onclick="document.getElementById('logo-file').click();" class="text-xs font-bold text-blue-600 underline">เปลี่ยนโลโก้ร้าน</button>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
-                    <div class="col-span-2"><label class="text-[10px] font-bold text-gray-400 uppercase">ชื่อ/ที่อยู่ร้าน</label><textarea id="shop-address-input" class="w-full p-3 bg-gray-50 rounded-xl border text-xs h-16"></textarea></div>
+                    <div class="col-span-2"><label class="text-[10px] font-bold text-gray-400 uppercase">ชื่อ/ที่อยู่ร้าน</label><textarea id="shop-address-input" class="w-full p-3 bg-gray-50 rounded-xl border text-xs h-16" placeholder="พิมพ์ชื่อหรือที่อยู่ร้านที่นี่..."></textarea></div>
                     <div><label class="text-[10px] font-bold text-gray-400 uppercase">PromptPay</label><input type="text" id="pp-input" class="w-full p-3 bg-gray-50 rounded-xl border font-bold text-green-700"></div>
                     <div><label class="text-[10px] font-bold text-gray-400 uppercase">VAT (%)</label><input type="number" id="vat-rate-input" class="w-full p-3 bg-gray-50 rounded-xl border font-bold text-blue-700"></div>
                 </div>
@@ -208,7 +183,7 @@
             <div class="flex justify-between items-center mb-6">
                 <div class="flex items-center gap-4">
                     <img id="main-logo" src="https://i.ibb.co/LzfNqfX/image-1aad44.png" class="w-16 h-16 object-contain rounded-xl bg-white p-1 shadow-sm">
-                    <div><h1 class="text-xl font-black text-green-900 leading-none uppercase">ณ COCO</h1><p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Integrated Farm System</p></div>
+                    <div><h1 id="main-shop-title" class="text-xl font-black text-green-900 leading-none uppercase">POS System</h1><p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Integrated Farm System</p></div>
                 </div>
                 <div class="flex gap-2">
                     <button onclick="openHistory()" class="p-3 bg-white border rounded-full text-blue-400 shadow-sm"><i class="fas fa-history"></i></button>
@@ -266,8 +241,29 @@
         </div>
     </div>
 
+    <!-- พื้นที่สลิปสรุปปิดยอดขายรายวันสำหรับ Print Browser -->
+    <div id="daily-receipt-area" class="text-center">
+        <h2 class="font-bold text-lg">รายงานสรุปปิดยอดขาย</h2>
+        <p id="daily-print-shopname" class="text-xs"></p>
+        <p id="daily-print-date" class="text-xs italic mb-2"></p>
+        <div style="border-top:1px dashed #000; margin:4px 0;"></div>
+        <div style="text-align:left; font-size:12px;">
+            <p>ยอดขายรวม: <span id="daily-print-sales" style="float:right; font-weight:bold;">0 .-</span></p>
+            <p>รายจ่ายรวม: <span id="daily-print-exps" style="float:right; font-weight:bold;">0 .-</span></p>
+            <p>กำไรสุทธิ: <span id="daily-print-net" style="float:right; font-weight:bold;">0 .-</span></p>
+        </div>
+        <div style="border-top:1px dashed #000; margin:4px 0;"></div>
+        <div style="text-align:left; font-size:11px;">
+            <p style="font-weight:bold; margin-bottom:2px;">รายละเอียดรายจ่าย:</p>
+            <div id="daily-print-details"></div>
+        </div>
+        <div style="border-top:1px dashed #000; margin:6px 0;"></div>
+        <p style="font-size:10px;">--- สรุปยอดเรียบร้อย ---</p>
+    </div>
+
     <script>
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbyx0_BRxbpfWvHV329LA4DdADtithM1BhI25rIgnuZvn981UCPcJ3qLBGUe3XqEvYk1/exec';
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbxcNHDfPB_UB_RDww3Z4RMIsxRa0_TlS5yyZkmHig7wfXdv-MvTIqCKpTowBJS0EAx5/exec';
+        
         let menuItems = JSON.parse(localStorage.getItem('na_coco_menu')) || [];
         let cart = [];
         let dailyHistory = JSON.parse(localStorage.getItem('na_coco_daily_log')) || [];
@@ -288,15 +284,55 @@
                 document.getElementById('receipt-logo').src = savedLogo;
                 document.getElementById('admin-logo-preview').src = savedLogo;
             }
-            document.getElementById('shop-address-display').innerText = localStorage.getItem('na_coco_addr') || "";
-            document.getElementById('shop-address-input').value = localStorage.getItem('na_coco_addr') || "";
+            
+            const savedAddr = localStorage.getItem('na_coco_addr') || "";
+            document.getElementById('shop-address-display').innerText = savedAddr;
+            document.getElementById('shop-address-input').value = savedAddr;
+            
+            // ดึงบรรทัดแรกมาแสดงเป็นชื่อร้านหลัก (ถ้ามีบันทึกไว้)
+            if(savedAddr.trim() !== "") {
+                const firstLine = savedAddr.split('\n')[0];
+                document.getElementById('main-shop-title').innerText = firstLine;
+                document.getElementById('daily-print-shopname').innerText = firstLine;
+            } else {
+                document.getElementById('main-shop-title').innerText = "POS System";
+                document.getElementById('daily-print-shopname').innerText = "";
+            }
+
             document.getElementById('pp-input').value = localStorage.getItem('na_coco_pp') || "";
             document.getElementById('vat-rate-input').value = localStorage.getItem('na_coco_vat') || "0";
             renderApp(); 
             updateCart(); 
         }
 
-        // --- ระบบเมนู ---
+        async function connectBluetooth() {
+            try {
+                const device = await navigator.bluetooth.requestDevice({
+                    filters: [{ services: ['000018f0-0000-1000-8000-00805f9b34fb'] }],
+                    optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb']
+                });
+                const server = await device.gatt.connect();
+                const service = await server.getPrimaryService('000018f0-0000-1000-8000-00805f9b34fb');
+                btCharacteristic = await service.getCharacteristic('00002af1-0000-1000-8000-00805f9b34fb');
+                document.getElementById('bt-status').classList.replace('text-gray-400', 'text-blue-600');
+                alert('เชื่อมต่อบลูทูธเรียบร้อยแล้ว!');
+            } catch (error) {
+                console.error(error);
+                alert('ไม่สามารถเชื่อมต่อบลูทูธได้: ' + error);
+            }
+        }
+
+        async function printViaBluetooth(text) {
+            if (!btCharacteristic) return;
+            try {
+                const encoder = new TextEncoder();
+                const data = encoder.encode(text);
+                await btCharacteristic.writeValue(data);
+            } catch (e) {
+                console.error('Bluetooth Print Error:', e);
+            }
+        }
+
         function renderApp() {
             document.getElementById('next-q').innerText = '#' + q.toString().padStart(2, '0');
             document.getElementById('receipt-q').innerText = '#' + q.toString().padStart(2, '0');
@@ -312,7 +348,7 @@
                     const card = document.createElement('div');
                     card.className = "menu-card shadow-sm";
                     card.onclick = () => addToCart(item.name, item.price);
-                    card.innerHTML = `<img src="${item.img || 'https://via.placeholder.com/200x150?text=Na+COCO'}" class="menu-img-display"><div class="p-3 text-center"><span class="font-bold text-[10px] text-gray-500 block truncate uppercase">${item.name}</span><span class="text-green-600 font-black">${item.price}.-</span></div>`;
+                    card.innerHTML = `<img src="${item.img || 'https://via.placeholder.com/200x150?text=Menu'}" class="menu-img-display"><div class="p-3 text-center"><span class="font-bold text-[10px] text-gray-500 block truncate uppercase">${item.name}</span><span class="text-green-600 font-black">${item.price}.-</span></div>`;
                     menuDiv.appendChild(card);
                 });
             });
@@ -378,7 +414,76 @@
             updateQR(finalTotal); calculateChange();
         }
 
-        // --- ระบบประวัติและรายจ่าย ---
+        function clearCart() {
+            cart = [];
+            isOrderConfirmed = false;
+            document.getElementById('discount-val').value = '';
+            document.getElementById('receipt-note').value = '';
+            document.getElementById('cash-in').value = '';
+            updateCart();
+        }
+
+        function resetQueue() {
+            if(confirm('ต้องการรีเซ็ตคิวกลับเป็น #01 ใช่หรือไม่?')) {
+                q = 1;
+                localStorage.setItem('na_coco_q', q);
+                renderApp();
+            }
+        }
+
+        function setUnit(u) {
+            discountUnit = u;
+            document.getElementById('unit-baht').classList.toggle('active', u === '฿');
+            document.getElementById('unit-percent').classList.toggle('active', u === '%');
+            updateCart();
+        }
+
+        function calculateChange() {
+            const cash = parseFloat(document.getElementById('cash-in').value) || 0;
+            const total = parseFloat(document.getElementById('total-price').innerText.replace(/,/g, '')) || 0;
+            const box = document.getElementById('change-box');
+            if (cash >= total && total > 0) {
+                document.getElementById('change-amount').innerText = (cash - total).toLocaleString();
+                box.classList.remove('hidden');
+            } else {
+                box.classList.add('hidden');
+            }
+        }
+
+        function updateQR(amount) {
+            const pp = localStorage.getItem('na_coco_pp');
+            const qrArea = document.getElementById('qr-area');
+            if (pp && amount > 0) {
+                document.getElementById('qr-img').src = `https://promptpay.io/${pp}/${amount}.png`;
+                qrArea.classList.remove('hidden');
+            } else {
+                qrArea.classList.add('hidden');
+            }
+        }
+
+        function openModifier(idx) {
+            editingIndex = idx;
+            document.getElementById('mod-note').value = cart[idx].note || '';
+            setSweet(cart[idx].sweet || '100%');
+            document.getElementById('modifier-modal').style.display = 'flex';
+        }
+
+        function setSweet(val) {
+            selectedSweet = val;
+            document.querySelectorAll('.sweet-btn').forEach(b => {
+                b.classList.toggle('active', b.dataset.val === val);
+            });
+        }
+
+        function saveModifier() {
+            if (editingIndex !== null) {
+                cart[editingIndex].sweet = selectedSweet;
+                cart[editingIndex].note = document.getElementById('mod-note').value;
+                updateCart();
+            }
+            document.getElementById('modifier-modal').style.display = 'none';
+        }
+
         function openHistory() { document.getElementById('history-modal').style.display = 'flex'; renderHistory(); }
         function closeHistory() { document.getElementById('history-modal').style.display = 'none'; }
 
@@ -465,7 +570,6 @@
             document.getElementById('hist-net').innerText = (sales - exps).toLocaleString();
         }
 
-        // --- ฟังก์ชันชำระเงิน ---
         async function handleCheckout() {
             if (cart.length === 0 || !isOrderConfirmed) return;
 
@@ -474,9 +578,10 @@
             const vatAmount = parseFloat(document.getElementById('txt-vat-amount').innerText.replace(/,/g, ''));
             const queueNo = document.getElementById('receipt-q').innerText;
             const note = document.getElementById('receipt-note').value;
+            const shopTitle = document.getElementById('main-shop-title').innerText;
 
             if (btCharacteristic) {
-                let txt = `    Na Coco\n`;
+                let txt = `   ${shopTitle}\n`;
                 txt += `คิว: ${queueNo}\n`;
                 txt += `เวลา: ${timeStr}\n`;
                 txt += `--------------------------\n`;
@@ -492,6 +597,7 @@
             }
 
             document.getElementById('cur-date').innerText = timeStr;
+            document.body.className = "print-order";
             window.print();
 
             dailyHistory.push({ 
@@ -514,6 +620,7 @@
                     method: 'POST',
                     mode: 'no-cors',
                     body: JSON.stringify({
+                        type: 'SALE_ORDER',
                         timestamp: timeStr,
                         items: itemsText,
                         amount: finalTotal,
@@ -522,7 +629,7 @@
                     })
                 });
             } catch (e) {
-                console.error("Sheet Error:", e);
+                console.error("Sheet Order Error:", e);
             }
 
             setTimeout(() => {
@@ -534,11 +641,16 @@
         }
 
         async function sendDailyClose() {
-            if (!confirm('ยืนยันปิดยอดและล้างคิวรายวัน?')) return;
+            if (!confirm('ยืนยันปิดยอดขายและส่งข้อมูลเข้า Google Sheet?')) return;
 
             let sales = 0;
             let exps = 0;
             let expDetails = [];
+            const timeStr = new Date().toLocaleString('th-TH');
+            const shopTitle = document.getElementById('main-shop-title').innerText;
+            
+            const today = new Date();
+            const dateStr = today.getDate() + "/" + (today.getMonth() + 1) + "/" + (today.getFullYear() + 543);
 
             dailyHistory.forEach(i => {
                 if (i.type === 'SALE') {
@@ -549,166 +661,101 @@
                 }
             });
 
-            const reportData = {
-                type: "DAILY_REPORT",
-                date: new Date().toLocaleDateString('th-TH'),
-                totalSales: sales,
-                totalExpense: exps,
-                netAmount: sales - exps,
-                expenseNote: expDetails.join(', ')
-            };
+            const net = sales - exps;
+            const expText = expDetails.length > 0 ? expDetails.join(', ') : '';
 
             try {
-                await fetch(scriptURL, {
+                fetch(scriptURL, {
                     method: 'POST',
                     mode: 'no-cors',
-                    body: JSON.stringify(reportData)
+                    body: JSON.stringify({
+                        type: 'DAILY_CLOSE',
+                        date: dateStr,
+                        sales: sales,
+                        exps: exps,
+                        expDetails: expText,
+                        net: net
+                    })
                 });
-
-                alert('ส่งปิดยอดเรียบร้อยแล้ว!');
-                dailyHistory = [];
-                localStorage.setItem('na_coco_daily_log', '[]');
-                q = 1;
-                localStorage.setItem('na_coco_q', 1);
-                location.reload();
-
             } catch (e) {
-                alert('เกิดข้อผิดพลาดในการเชื่อมต่อ: ' + e);
+                console.error("Sheet Daily Close Error:", e);
             }
-        }
 
-        // --- Bluetooth Printer ---
-        async function connectBluetooth() {
-            try {
-                const device = await navigator.bluetooth.requestDevice({
-                    acceptAllDevices: true,
-                    optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb']
-                });
-                const server = await device.gatt.connect();
-                const service = await server.getPrimaryService('000018f0-0000-1000-8000-00805f9b34fb');
-                btCharacteristic = await service.getCharacteristic('00002af1-0000-1000-8000-00805f9b34fb');
-                document.getElementById('bt-status').classList.replace('text-gray-400', 'text-blue-500');
-                alert('เชื่อมต่อเครื่องพิมพ์บลูทูธสำเร็จ!');
-            } catch (e) {
-                console.error(e);
-                alert('ไม่สามารถเชื่อมต่อบลูทูธได้');
-            }
-        }
-
-        async function printViaBluetooth(text) {
-            if (!btCharacteristic) return;
-            const encoder = new TextEncoder();
-            const data = encoder.encode(text);
-            await btCharacteristic.writeValue(data);
-        }
-
-        // --- Helper Functions ---
-        function openModifier(idx) {
-            editingIndex = idx;
-            const item = cart[idx];
-            document.getElementById('mod-title').innerText = item.name;
-            document.getElementById('mod-note').value = item.note || '';
-            setSweet(item.sweet || '100%');
-            document.getElementById('modifier-modal').style.display = 'flex';
-        }
-
-        function setSweet(val) {
-            selectedSweet = val;
-            document.querySelectorAll('.sweet-btn').forEach(btn => {
-                if (btn.getAttribute('data-val') === val) {
-                    btn.classList.add('active');
+            if (btCharacteristic) {
+                let txt = `==========================\n`;
+                txt += `    รายงานสรุปปิดยอดขาย\n`;
+                txt += `        ${shopTitle}\n`;
+                txt += `==========================\n`;
+                txt += `เวลาปิดยอด: ${timeStr}\n`;
+                txt += `--------------------------\n`;
+                txt += `ยอดขายรวม:   ${sales.toLocaleString()} .-\n`;
+                txt += `รายจ่ายรวม:   ${exps.toLocaleString()} .-\n`;
+                txt += `กำไรสุทธิ:    ${net.toLocaleString()} .-\n`;
+                txt += `--------------------------\n`;
+                txt += `รายการจ่าย:\n`;
+                if(expDetails.length > 0) {
+                    expDetails.forEach(d => { txt += `- ${d}\n`; });
                 } else {
-                    btn.classList.remove('active');
+                    txt += `- ไม่มีรายการจ่าย\n`;
                 }
-            });
-        }
-
-        function saveModifier() {
-            if (editingIndex !== null && cart[editingIndex]) {
-                cart[editingIndex].sweet = selectedSweet;
-                cart[editingIndex].note = document.getElementById('mod-note').value;
-                updateCart();
+                txt += `==========================\n\n\n\n\n`;
+                await printViaBluetooth(txt);
             }
-            document.getElementById('modifier-modal').style.display = 'none';
-        }
 
-        function setUnit(unit) {
-            discountUnit = unit;
-            if (unit === '฿') {
-                document.getElementById('unit-baht').classList.add('active');
-                document.getElementById('unit-percent').classList.remove('active');
-            } else {
-                document.getElementById('unit-percent').classList.add('active');
-                document.getElementById('unit-baht').classList.remove('active');
-            }
-            updateCart();
-        }
-
-        function calculateChange() {
-            const total = parseFloat(document.getElementById('total-price').innerText.replace(/,/g, '')) || 0;
-            const cash = parseFloat(document.getElementById('cash-in').value) || 0;
-            const changeBox = document.getElementById('change-box');
+            document.getElementById('daily-print-date').innerText = timeStr;
+            document.getElementById('daily-print-shopname').innerText = shopTitle;
+            document.getElementById('daily-print-sales').innerText = sales.toLocaleString() + ' .-';
+            document.getElementById('daily-print-exps').innerText = exps.toLocaleString() + ' .-';
+            document.getElementById('daily-print-net').innerText = net.toLocaleString() + ' .-';
             
-            if (cash > 0 && cash >= total) {
-                document.getElementById('change-amount').innerText = (cash - total).toLocaleString();
-                changeBox.classList.remove('hidden');
+            const printExpDetails = document.getElementById('daily-print-details');
+            if(expDetails.length > 0) {
+                printExpDetails.innerHTML = expDetails.map(d => `<p style="margin:2px 0;">• ${d}</p>`).join('');
             } else {
-                changeBox.classList.add('hidden');
+                printExpDetails.innerHTML = `<p style="margin:2px 0;">- ไม่มี -</p>`;
             }
-        }
 
-        function updateQR(amount) {
-            const pp = localStorage.getItem('na_coco_pp');
-            const qrArea = document.getElementById('qr-area');
-            if (pp && amount > 0) {
-                document.getElementById('qr-img').src = `https://promptpay.io/${pp}/${amount}.png`;
-                qrArea.classList.remove('hidden');
-            } else {
-                qrArea.classList.add('hidden');
-            }
-        }
+            document.body.className = "print-daily";
+            window.print();
 
-        function clearCart() {
-            cart = [];
-            isOrderConfirmed = false;
-            document.getElementById('cash-in').value = '';
-            document.getElementById('discount-val').value = '';
-            document.getElementById('receipt-note').value = '';
-            updateCart();
-        }
-
-        function resetQueue() {
-            if (confirm('ต้องการรีเซ็ตคิวเป็น #01 หรือไม่?')) {
+            setTimeout(() => {
+                dailyHistory = [];
+                localStorage.setItem('na_coco_daily_log', JSON.stringify([]));
                 q = 1;
                 localStorage.setItem('na_coco_q', q);
+                closeHistory();
                 renderApp();
+                alert('ส่งปิดยอดเข้า Google Sheet และพิมพ์สลิปเรียบร้อยแล้ว!');
+            }, 1000);
+        }
+
+        function openAdmin() { document.getElementById('admin-modal').style.display = 'flex'; renderAdminMenu(); }
+        function closeAdmin() { document.getElementById('admin-modal').style.display = 'none'; }
+
+        function processImage(input, type) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (type === 'logo') {
+                        tempLogoData = e.target.result;
+                        document.getElementById('admin-logo-preview').src = tempLogoData;
+                    }
+                };
+                reader.readAsDataURL(input.files[0]);
             }
-        }
-
-        // --- Admin Section ---
-        function openAdmin() {
-            renderAdminMenu();
-            document.getElementById('admin-modal').style.display = 'flex';
-        }
-
-        function closeAdmin() {
-            document.getElementById('admin-modal').style.display = 'none';
         }
 
         function renderAdminMenu() {
-            const container = document.getElementById('admin-menu-list');
-            container.innerHTML = menuItems.map((item, idx) => `
-                <div class="p-3 bg-gray-50 rounded-xl border space-y-2">
-                    <div class="flex gap-2 items-center">
-                        <img src="${item.img || 'https://via.placeholder.com/50'}" class="w-10 h-10 object-cover rounded-lg">
-                        <input type="file" id="file-${idx}" accept="image/*" class="hidden" onchange="processImage(this, ${idx})">
-                        <button type="button" onclick="document.getElementById('file-${idx}').click()" class="text-[10px] bg-white border px-2 py-1 rounded">เปลี่ยนรูป</button>
-                        <button type="button" onclick="menuItems.splice(${idx},1); renderAdminMenu();" class="text-red-500 ml-auto text-xs"><i class="fas fa-trash"></i></button>
+            const list = document.getElementById('admin-menu-list');
+            list.innerHTML = menuItems.map((item, idx) => `
+                <div class="bg-gray-50 p-3 rounded-xl border space-y-2">
+                    <div class="flex gap-2">
+                        <input type="text" value="${item.name}" onchange="menuItems[${idx}].name=this.value" class="flex-grow p-2 border rounded-lg text-xs" placeholder="ชื่อเมนู">
+                        <input type="number" value="${item.price}" onchange="menuItems[${idx}].price=parseFloat(this.value)" class="w-20 p-2 border rounded-lg text-xs" placeholder="ราคา">
                     </div>
-                    <div class="grid grid-cols-3 gap-2">
-                        <input type="text" value="${item.category || ''}" placeholder="หมวดหมู่" onchange="menuItems[${idx}].category = this.value" class="p-2 border rounded text-xs">
-                        <input type="text" value="${item.name || ''}" placeholder="ชื่อเมนู" onchange="menuItems[${idx}].name = this.value" class="p-2 border rounded text-xs">
-                        <input type="number" value="${item.price || ''}" placeholder="ราคา" onchange="menuItems[${idx}].price = parseFloat(this.value)" class="p-2 border rounded text-xs">
+                    <div class="flex gap-2 items-center">
+                        <input type="text" value="${item.category || ''}" onchange="menuItems[${idx}].category=this.value" class="flex-grow p-2 border rounded-lg text-xs" placeholder="หมวดหมู่">
+                        <button onclick="menuItems.splice(${idx},1); renderAdminMenu();" class="text-red-500 p-2 text-xs"><i class="fas fa-trash"></i></button>
                     </div>
                 </div>
             `).join('');
@@ -719,44 +766,33 @@
             renderAdminMenu();
         }
 
-        function processImage(input, target) {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    if (target === 'logo') {
-                        tempLogoData = e.target.result;
-                        document.getElementById('admin-logo-preview').src = tempLogoData;
-                    } else {
-                        menuItems[target].img = e.target.result;
-                        renderAdminMenu();
-                    }
-                };
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-
         function saveSettings() {
             if (tempLogoData) {
                 localStorage.setItem('na_coco_logo', tempLogoData);
                 document.getElementById('main-logo').src = tempLogoData;
                 document.getElementById('receipt-logo').src = tempLogoData;
             }
-            const addr = document.getElementById('shop-address-input').value;
-            const pp = document.getElementById('pp-input').value;
-            const vat = document.getElementById('vat-rate-input').value;
-
-            localStorage.setItem('na_coco_addr', addr);
-            localStorage.setItem('na_coco_pp', pp);
-            localStorage.setItem('na_coco_vat', vat);
+            const addrVal = document.getElementById('shop-address-input').value;
+            localStorage.setItem('na_coco_addr', addrVal);
+            localStorage.setItem('na_coco_pp', document.getElementById('pp-input').value);
+            localStorage.setItem('na_coco_vat', document.getElementById('vat-rate-input').value);
             localStorage.setItem('na_coco_menu', JSON.stringify(menuItems));
+            
+            document.getElementById('shop-address-display').innerText = addrVal;
+            
+            if(addrVal.trim() !== "") {
+                const firstLine = addrVal.split('\n')[0];
+                document.getElementById('main-shop-title').innerText = firstLine;
+                document.getElementById('daily-print-shopname').innerText = firstLine;
+            } else {
+                document.getElementById('main-shop-title').innerText = "POS System";
+                document.getElementById('daily-print-shopname').innerText = "";
+            }
 
-            document.getElementById('shop-address-display').innerText = addr;
             closeAdmin();
             renderApp();
-            updateCart();
-            alert('บันทึกข้อมูลเรียบร้อยแล้ว');
+            alert('บันทึกการตั้งค่าเรียบร้อยแล้ว');
         }
     </script>
 </body>
 </html>
-
